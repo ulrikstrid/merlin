@@ -339,7 +339,7 @@ module Option = struct
 end
 
 module Result = struct
-  type ('a, 'e) t = ('a, 'e) Result.result =
+  type ('a, 'e) t = ('a, 'e) Result.t =
   | Ok of 'a
   | Error of 'e
 end
