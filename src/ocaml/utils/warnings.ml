@@ -107,7 +107,6 @@ type t =
   | Missing_mli                             (* 70 *)
   | Unused_tmc_attribute                    (* 71 *)
   | Tmc_breaks_tailcall                     (* 72 *)
-;;
 
 (* If you remove a warning, leave a hole in the numbering.  NEVER change
    the numbers of existing warnings.
@@ -190,9 +189,11 @@ let number = function
   | Unused_tmc_attribute -> 71
   | Tmc_breaks_tailcall -> 72
 ;;
+(* DO NOT REMOVE the ;; above: it is used by
+   the testsuite/ests/warnings/mnemonics.mll test to determine where
+   the  definition of the number function above ends *)
 
 let last_warning_number = 72
-;;
 
 type description =
   { number : int;
@@ -447,7 +448,6 @@ let descriptions = [
     description = "A tail call is turned into a non-tail call \
                    by the @tail_mod_cons transformation." };
 ]
-;;
 
 let name_to_number =
   let h = Hashtbl.create last_warning_number in
@@ -455,7 +455,6 @@ let name_to_number =
       List.iter (fun name -> Hashtbl.add h name number) names
     ) descriptions;
   fun s -> Hashtbl.find_opt h s
-;;
 
 (* Must be the max number returned by the [number] function. *)
 
@@ -489,7 +488,6 @@ let letter = function
   | 'y' -> [26]
   | 'z' -> [27]
   | _ -> assert false
-;;
 
 type state =
   {
@@ -773,7 +771,6 @@ let parse_opt error active errflag s =
         | '@', Some n -> action Set_all n; None
         | _ -> parse_and_eval s
       end
-;;
 
 let parse_options errflag s =
   let error = Array.copy (!current).error in
@@ -783,11 +780,11 @@ let parse_options errflag s =
   alerts
 
 (* If you change these, don't forget to change them in man/ocamlc.m *)
-let defaults_w = "+a-4-7-9-27-29-30-32..42-44-45-48-50-60-66..70";;
-let defaults_warn_error = "-a+31";;
+let defaults_w = "+a-4-7-9-27-29-30-32..42-44-45-48-50-60-66..70"
+let defaults_warn_error = "-a+31"
 
-let () = ignore @@ parse_options false defaults_w;;
-let () = ignore @@ parse_options true defaults_warn_error;;
+let () = ignore @@ parse_options false defaults_w
+let () = ignore @@ parse_options true defaults_warn_error
 
 let ref_manual_explanation () =
   (* manual references are checked a posteriori by the manual
@@ -973,17 +970,24 @@ let message = function
   | Inlining_impossible reason ->
       Printf.sprintf "Cannot inline: %s" reason
   | Ambiguous_var_in_pattern_guard vars ->
-      let msg =
-        let vars = List.sort String.compare vars in
+      let vars = List.sort String.compare vars in
+      let vars_explanation =
+        let in_different_places =
+          "in different places in different or-pattern alternatives"
+        in
         match vars with
         | [] -> assert false
-        | [x] -> "variable " ^ x
+        | [x] -> "variable " ^ x ^ " appears " ^ in_different_places
         | _::_ ->
-            "variables " ^ String.concat "," vars in
+            let vars = String.concat ", " vars in
+            "variables " ^ vars ^ " appear " ^ in_different_places
+      in
       Printf.sprintf
         "Ambiguous or-pattern variables under guard;\n\
-         %s may match different arguments. %t"
-        msg ref_manual_explanation
+         %s.\n\
+         Only the first match will be used to evaluate the guard expression.\n\
+         %t"
+        vars_explanation ref_manual_explanation
   | No_cmx_file name ->
       Printf.sprintf
         "no cmx file was found in path for module %s, \
@@ -1035,19 +1039,19 @@ let message = function
   | Missing_mli ->
     "Cannot find interface file."
   | Unused_tmc_attribute ->
-      "This function is marked @tail_mod_cons but is never applied in \
-       TMC position."
+      "This function is marked @tail_mod_cons\n\
+       but is never applied in TMC position."
   | Tmc_breaks_tailcall ->
-      "This call is in tail-modulo-cons position in a TMC function,\n\
+      "This call\n\
+       is in tail-modulo-cons positionin a TMC function,\n\
        but the function called is not itself specialized for TMC,\n\
        so the call will not be transformed into a tail call.\n\
-       Please either mark the called function with\n\
-       the [@tail_mod_cons] attribute, or mark this call with\n\
-       the [@tailcall false] attribute to make its non-tailness \
-       explicit."
+       Please either mark the called function with the [@tail_mod_cons]\n\
+       attribute, or mark this call with the [@tailcall false] attribute\n\
+       to make its non-tailness explicit."
 ;;
 
-let nerrors = ref 0;;
+let nerrors = ref 0
 
 type reporting_information =
   { id : string
@@ -1109,7 +1113,7 @@ let report_alert (alert : alert) =
           sub_locs;
         }
 
-exception Errors;;
+exception Errors
 
 let reset_fatal () =
   nerrors := 0
@@ -1118,8 +1122,7 @@ let check_fatal () =
   if !nerrors > 0 then begin
     nerrors := 0;
     raise Errors;
-  end;
-;;
+  end
 
 let help_warnings () =
   List.iter
@@ -1144,7 +1147,6 @@ let help_warnings () =
           (String.concat ", " (List.map Int.to_string l))
   done;
   exit 0
-;;
 
 (* merlin *)
 
@@ -1181,4 +1183,3 @@ let dump ?(verbose=false) () =
     "alerts", alerts !current.alerts;
     "alerts_error", alerts !current.alert_errors;
   ]
-;;
