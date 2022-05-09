@@ -192,5 +192,8 @@ end) = struct
   module Commands = struct
     let send_file chan path =
       Chan.write chan Sexp.(List [Atom "File"; Atom path])
+
+    let halt chan =
+      Chan.write chan (Sexp.Atom "Halt")
   end
 end

@@ -103,5 +103,7 @@ end) : sig
 
   module Commands : sig
     val send_file : Chan.t -> string -> unit IO.t
+
+    val halt : Chan.t -> unit IO.t
   end
 end
